@@ -17,8 +17,20 @@ createApp({
         const haveTwoNames= computed(()=>{
             return data.names.length>1
         })
+        const generateLooser=()=>{
+            let random=getRandomName();
+
+            if(data.result !==""){
+                while(random === data.result){
+                    random=generateLooser();
+                }
+            }
+
+            data.result=random;
+        }
 
         const showResult=()=>{
+            generateLooser();
             data.state=false;
         }
 
@@ -57,10 +69,27 @@ createApp({
             
         }
 
+        const getRandomName=()=>{
+            return data.names[Math.floor(Math.random()*data.names.length)]
+        }
+       
         const removeName=(index)=>{
             data.names.splice(index,1);
         }
 
-        return{ data, addNameToList, removeName, haveTwoNames, showResult }
+        const resetApp=()=>{
+            data.state=true;
+            data.inputName="";
+            data.names=[];
+            data.error="";
+            data.showError=false;
+            data.result="";
+        }
+        
+        const getNewName=()=>{
+            generateLooser();
+        }
+
+        return{ data, addNameToList, removeName, haveTwoNames, showResult, resetApp, getNewName }
     }
 }).mount("#app")
