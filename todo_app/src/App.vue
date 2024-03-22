@@ -10,7 +10,7 @@
         <section class="create-todo"> 
             <h3>Create a todo</h3>
 
-            <form>
+            <form id="new-todo-form" @submit.prevent="addTodo" >
                 <h4>What's on your todo list?</h4>
                 <input type="text" placeholder="e.g: Walk my dog" v-model="inputContent" id="content">
 
@@ -23,7 +23,7 @@
                       type="radio" 
                       name="category"
                       id="category1"  
-                      value="Business" 
+                      value="business" 
                       v-model="inputCategory"
                       >
                       <span class="bubble business"></span>
@@ -36,7 +36,7 @@
                       type="radio" 
                       name="category" 
                       id="category2"
-                      value="Personal" 
+                      value="personal" 
                       v-model="inputCategory"
                       >
                       <span class="bubble personal"></span>
@@ -45,8 +45,30 @@
 
                 </div>
 
-                <input type="submit" value="Add todo"  @click="addTodo">
+                <input type="submit" value="Add todo">
              </form>
+        </section>
+        <section class="todo-list">
+            <h3>Todo List</h3>
+            <div class="list" id="todo-list">
+                <div v-for="todo in sortTodos" :class="`todo-item ${todo.done && 'done'}`">
+                
+                    <label>
+                        <input type="checkbox" v-model="todo.done">
+                        <span :class="`bubble ${
+							todo.category == 'business' ? 'business' : 'personal'}`"></span>
+                    </label>
+
+                    <div class="todo-content">
+                        <input type="text" v-model="todo.content">
+                    </div>
+
+                    <div class="actions">
+                        <button class="delete" @click="removeTodo(todo)">Delete</button>
+                    </div>
+
+                </div>
+            </div>
         </section>
     </main>
 </template>
@@ -60,9 +82,24 @@
     const inputContent=ref('');
     const inputCategory=ref(null);
 
+    const addTodo =()=>{
+        if (inputContent.value.trim()==="" || inputCategory.value === null){
+          return;
+        }else{
+          todos.value.push({
+            content:inputContent.value,
+            category:inputCategory.value,
+            createdAt:new Date().getTime(),
+            done:false
+          })
+          inputContent.value=''
+          inputCategory.value=null
+        }
+    }
+
 
     const sortTodos= computed(()=>{
-        todos.value.sor((a,b)=>{return a.createdAt-b.createdAt})
+        return todos.value.sort((a,b)=>{return a.createdAt-b.createdAt})
     })
 
     watch(todos, (newTodo)=>{
@@ -74,18 +111,10 @@
     })
     onMounted(()=>{
         name.value=localStorage.getItem('name');
+        todos.value=JSON.parse(localStorage.getItem('todos')) || []
     })
 
-    const addTodo =()=>{
-        if (inputContent.value.trim()==="" || inputCategory.value===null){
-          return;
-        }else{
-          todos.value.push({
-            content:inputContent.value,
-            category:inputCategory.value,
-            createdAt:new Date().getTime(),
-            done:false
-          })
-        }
+    const removeTodo=(todo)=>{
+        todos.value=todos.value.filter(todos=> todos!== todo);
     }
 </script>
