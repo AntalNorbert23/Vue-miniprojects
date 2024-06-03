@@ -1,11 +1,11 @@
 <template>
-    <div class="project">
-        <div class="actions" @click="showDetails ">
-            <h3>{{ prop.project.title}}</h3>
+    <div class="project" :class="{complete: prop.project.complete}">
+        <div class="actions">
+            <h3 @click="showDetails">{{ prop.project.title}}</h3>
             <div class="icons">
-                <span class="material-icons">done</span>
+                <span class="material-icons tick" @click="toggleComplete">done</span>
+                <span class="material-icons"@click="deleteProject">delete</span>
                 <span class="material-icons">edit</span>
-                <span class="material-icons">delete</span>
             </div>
         </div>
         <div class="details" v-show="detailsVisible">
@@ -18,10 +18,28 @@
 <script setup>
     import { ref } from 'vue';
     const prop= defineProps(['project'])
+    const emit = defineEmits(['delete','complete']);
     const detailsVisible=ref(false);
+    const url=`http://localhost:3000/projects/${prop.project.id}`;
 
     const showDetails=()=>{
         detailsVisible.value=!detailsVisible.value
+    }
+
+    const deleteProject=()=>{
+        fetch(url,{method:'DELETE'})
+        .then(()=>emit('delete',prop.project.id))
+        .catch(error=>console.log(error.message))
+    }
+
+    const toggleComplete=()=>{
+        fetch(url,{
+            method:'PATCH',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({complete: !prop.project.complete})
+        }).then(()=>{
+            emit('complete',prop.project.id)
+        }).catch((error)=>{console.log(error.message)})
     }
 </script>
 
@@ -50,5 +68,11 @@
     }
     .material-icons:hover{
         color:#777;
+    }
+    .project.complete{
+        border-left:4px solid #00ce89;
+    }
+    .project.complete .tick{ 
+        color:#00ce89;
     }
 </style>
