@@ -5,7 +5,7 @@
             <div class="icons">
                 <span class="material-icons tick" @click="toggleComplete">done</span>
                 <span class="material-icons"@click="deleteProject">delete</span>
-                <span class="material-icons">edit</span>
+                <router-link :to="{name:'EditProject',params:{id:prop.project.id }}"><span class="material-icons">edit</span></router-link>
             </div>
         </div>
         <div class="details" v-show="detailsVisible">
