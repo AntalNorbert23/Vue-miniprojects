@@ -15,7 +15,7 @@
     
     const email=ref('');
     const password=ref('');
-    
+    const emit=defineEmits(['login']);
 
     const { error,login }=useLogin();
 

@@ -15,6 +15,8 @@
     import useSignup from '@/composables/useSignup';
 
     const { error, signUp }=useSignup();
+
+    const emit=defineEmits(['signup']);
       
     const displayName=ref('');
     const email=ref('');
@@ -22,6 +24,9 @@
 
     const handleSubmit=async()=>{
         await signUp(email.value,password.value,displayName.value);
+        if(!error.value){
+            emit('signup');
+        }
     }
 
 
