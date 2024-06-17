@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <navbar/>
-       
+        <newChatForm/>
     </div>
 </template>
 
@@ -9,7 +9,7 @@
     import navbar from '@/components/navbar.vue'
     import getUser from '@/composables/getUser';
 
-   
+    import newChatForm from '@/components/newChatForm.vue'
 
     import { watch } from 'vue';
 
