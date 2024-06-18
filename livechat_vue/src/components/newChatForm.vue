@@ -6,6 +6,7 @@
             @keypress.enter.prevent="handleSubmit"
         >
         </textarea>
+        <div class="error">{{ error }}</div>
     </form>
 </template>
 
@@ -17,6 +18,9 @@
     import getUser from '@/composables/getUser'
     const { user }=getUser();
 
+    import useCollection from'@/composables/useCollection'
+    const { addDocToCollection, error }=useCollection('messages');
+
     const message=ref('');
 
     const handleSubmit=async ()=>{
@@ -26,7 +30,12 @@
             createdAt:timestamp()
         }
 
-        message.value='';
+        await addDocToCollection(chat);
+
+        if(!error.value){
+            message.value='';
+        }
+        
     }
 </script>
 
