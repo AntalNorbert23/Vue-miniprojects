@@ -12,7 +12,7 @@ const getCollection=(collectionName)=>{
     
     onSnapshot(q,(snapshot)=>{
         let results=[];
-        snapshot.docs.array.forEach(doc => {
+        snapshot.docs.forEach(doc => {
             const data=doc.data();
 
             if(data.createdAt){
