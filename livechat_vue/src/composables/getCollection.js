@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref,watchEffect } from "vue";
 import { DB } from "@/firebase/config";
 import { collection, query,orderBy,onSnapshot } from "firebase/firestore";
 
@@ -10,7 +10,7 @@ const getCollection=(collectionName)=>{
     let colRef=collection(DB,collectionName);
     const q=query(colRef,orderBy('createdAt'));
     
-    onSnapshot(q,(snapshot)=>{
+    const unsub=onSnapshot(q,(snapshot)=>{
         let results=[];
         snapshot.docs.forEach(doc => {
             const data=doc.data();
@@ -27,6 +27,9 @@ const getCollection=(collectionName)=>{
         error.value='Could not fetch data';
     })
 
+    watchEffect((onInvalidate)=>{
+        onInvalidate(()=>unsub())
+    })
     return{ documents,error }
 }
 
