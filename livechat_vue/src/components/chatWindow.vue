@@ -5,6 +5,7 @@
         </div>
         <div v-if="documents"
             class="messages"
+            ref="messages"
         >
             <div v-for="doc in formattedDocuments" :key="doc.id" class="single">
                 <span class="created-at">{{ doc.createdAt }}</span>
@@ -16,12 +17,18 @@
 </template>
 
 <script setup>
-    import { computed } from 'vue';
+    import { computed,ref,onUpdated } from 'vue';
 
     import getCollection from '@/composables/getCollection';
     import { formatDistanceToNow } from 'date-fns'
 
     const { documents, error }=getCollection('messages');
+
+    const messages=ref(null);
+
+    onUpdated(()=>{
+        messages.value.scrollTop=messages.value.scrollHeight;
+    })
 
     const formattedDocuments=computed(()=>{
         if (documents.value) {
