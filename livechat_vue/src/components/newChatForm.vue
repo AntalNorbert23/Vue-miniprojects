@@ -1,14 +1,18 @@
 <template>
     <form>
-        <textarea 
-            placeholder="Type a message and hit enter to send..."
-            v-model="message"
-            @keypress.enter.prevent="handleSubmit"
-        >
-        </textarea>
+        <div class="textarea-container">
+            <textarea 
+                placeholder="Type a message and hit enter to send..."
+                v-model="message"
+                @keypress.enter.prevent="handleSubmit"
+            >
+            </textarea>
+            <button @click.prevent="handleSubmit" class="send-button">Send</button>
+        </div>
         <div class="error">{{ error }}</div>
     </form>
 </template>
+
 
 <script setup>
     import { ref } from 'vue';
@@ -44,14 +48,23 @@
         margin:10px;
     }
     textarea{
-        width:100%;
+        width:90%;
         max-width:100%;
         margin-bottom:6px;
-        padding:10px;
+        padding:12px;
         box-sizing:border-box;
         border:0;
         border-radius:20px;
         font-family: inherit;
         outline:none;
     }
+    .textarea-container{
+        display: flex;
+        justify-content: flex-center;
+        align-items: center;
+    }
+    .send-button {
+    border: none;
+    margin-left:20px;
+}
 </style>
