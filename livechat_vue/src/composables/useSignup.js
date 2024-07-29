@@ -1,6 +1,7 @@
 import { AUTH } from "@/firebase/config";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref } from "vue";
+import errorCode from "./getErrors";
 
 const error =ref(null);
 
@@ -17,7 +18,7 @@ const signUp=async (email, password, displayName)=>{
 
       return response;
     }catch(err){
-        error.value=err.message;
+        error.value=new Error(errorCode(err.code));
     }
 };
 

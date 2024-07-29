@@ -1,6 +1,7 @@
 import { AUTH } from "@/firebase/config";
 import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref } from "vue";
+import errorCode from "./getErrors";
 
 const error =ref(null);
 
@@ -13,8 +14,7 @@ const login = async (email,password)=>{
 
         return response;
     }catch(err){
-        console.log(err.value);
-        error.value="Incorrect login credentials"
+        error.value=new Error(errorCode(err.code));
     }
 }
 
