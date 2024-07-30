@@ -31,9 +31,9 @@
         const chat={
             message:message.value,
             name:user.value.displayName,
-            createdAt:timestamp()
+            createdAt:timestamp(),
+            uid:user.value.uid,
         }
-
         await addDocToCollection(chat);
 
         if(!error.value){
