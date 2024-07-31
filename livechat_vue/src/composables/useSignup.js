@@ -2,10 +2,12 @@ import { AUTH } from "@/firebase/config";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref } from "vue";
 import errorCode from "./getErrors";
+import { useToast } from "vue-toast-notification";
 
 const error =ref(null);
 
 const signUp=async (email, password, displayName)=>{
+  const $toast=useToast();
     error.value=null;
 
     try{
@@ -16,9 +18,11 @@ const signUp=async (email, password, displayName)=>{
       await updateProfile(response.user, { displayName });
       error.value=null;
 
+      $toast.success("Successfully signed up");
       return response;
     }catch(err){
         error.value=new Error(errorCode(err.code));
+        $toast.error(error.value)
     }
 };
 

@@ -2,19 +2,23 @@ import { AUTH } from "@/firebase/config";
 import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref } from "vue";
 import errorCode from "./getErrors";
+import { useToast } from "vue-toast-notification";
 
 const error =ref(null);
 
 const login = async (email,password)=>{
+    const $toast=useToast();
     error.value=null;
 
     try{
         const response= await signInWithEmailAndPassword(AUTH,email,password);
         error.value=null;
 
+        $toast.success("Successfully logged in");
         return response;
     }catch(err){
         error.value=new Error(errorCode(err.code));
+        $toast.error(error.value);
     }
 }
 

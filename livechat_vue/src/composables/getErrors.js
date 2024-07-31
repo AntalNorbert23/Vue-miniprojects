@@ -18,7 +18,10 @@ const errorCode=(code)=>{
         case "auth/weak-password":
             message='Password must be longer than 6 characters'
             break;
-        
+        case "auth/too-many-requests":
+            message='Try again later!'
+            break;
+            
         default:
             message=code;
     }
