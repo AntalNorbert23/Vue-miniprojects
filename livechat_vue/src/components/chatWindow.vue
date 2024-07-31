@@ -1,9 +1,9 @@
 <template>
     <div class="chat-window">
-        <div v-if="error">
-            {{ error }}
+        <div v-if="loading" class="loader">
+            <Loader />
         </div>
-        <div v-if="documents"
+        <div v-else-if="documents"
             class="messages"
             ref="messages"
         >
@@ -13,11 +13,16 @@
                 <span class="message">{{ doc.message }}</span>
             </div>
         </div>
+        <div v-else="error">
+            {{ error }}
+        </div>
     </div>
 </template>
 
 <script setup>
-    import { computed,ref,onUpdated } from 'vue';
+    import Loader from '@/components/Loader.vue'
+
+    import { computed,ref,onUpdated,watchEffect } from 'vue';
 
     import getCollection from '@/composables/getCollection';
     import { formatDistanceToNow } from 'date-fns';
@@ -28,6 +33,13 @@
     const { documents, error }=getCollection('messages');
 
     const messages=ref(null);
+    const loading = ref(true); 
+
+    watchEffect(()=>{
+        if(documents.value!==null){
+            loading.value=false;
+        }
+    })
     
 
     onUpdated(()=>{
@@ -56,6 +68,11 @@
     .chat-window{
         background-color: #fafafa;
         padding:30px 20px;
+    }
+    .loader{
+        display:flex;
+        justify-content: center;
+        align-items: center;
     }
     .single{
         margin:18px 0;
