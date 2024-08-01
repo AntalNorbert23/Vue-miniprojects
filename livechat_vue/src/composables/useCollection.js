@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { DB } from "@/firebase/config";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc,setDoc,doc, deleteDoc } from "firebase/firestore";
 
 
 const useCollection=(collectionName)=>{
@@ -17,7 +17,16 @@ const useCollection=(collectionName)=>{
             err.value='Could not send the message';
         }
     }
-    return { error, addDocToCollection }
+
+    const setTypingStatus=async(user)=>{
+        const typingDocRef=doc(collection(DB,'typingStatuses'),user.uid);
+        await setDoc(typingDocRef,{name: user.displayName, uid:user.uid, isTyping:true})
+    
+        setTimeout(async() => {
+            await deleteDoc(typingDocRef);
+        }, 4000);
+    }
+    return { error, addDocToCollection,setTypingStatus }
 }
 
 

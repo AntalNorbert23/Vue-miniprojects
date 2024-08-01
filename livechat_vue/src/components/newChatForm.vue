@@ -4,6 +4,7 @@
             <textarea 
                 placeholder="Type a message and hit enter to send..."
                 v-model="message"
+                @input="handleTyping"
                 @keypress.enter.prevent="handleSubmit"
             >
             </textarea>
@@ -23,7 +24,7 @@
     const { user }=getUser();
 
     import useCollection from'@/composables/useCollection'
-    const { addDocToCollection, error }=useCollection('messages');
+    const { addDocToCollection, error,setTypingStatus }=useCollection('messages');
 
     const message=ref('');
 
@@ -38,8 +39,11 @@
 
         if(!error.value){
             message.value='';
-        }
-        
+        }  
+    }
+
+    const handleTyping=()=>{
+        setTypingStatus(user.value);
     }
 </script>
 

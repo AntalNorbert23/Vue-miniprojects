@@ -3,7 +3,7 @@
         <div v-if="loading" class="loader">
             <Loader />
         </div>
-        <div v-else-if="documents"
+        <div v-else-if="documents && documents.length>0"
             class="messages"
             ref="messages"
         >
@@ -13,9 +13,15 @@
                 <span class="message">{{ doc.message }}</span>
             </div>
         </div>
-        <div v-else="error">
-            {{ error }}
+        <div v-else class="no_messages">
+            <p>Type a message and press enter to start a conversation...</p>
         </div>
+        <div v-if="typingUsers.length>0" class="typing_user">
+            <span v-for="user in typingUsers" key="user.id">{{ user.name }} is typing...</span>
+        </div>
+    </div>
+    <div v-if="error">
+            {{ error }}
     </div>
 </template>
 
@@ -30,7 +36,7 @@
     import getUser from '@/composables/getUser'
     const { user } = getUser();
 
-    const { documents, error }=getCollection('messages');
+    const { documents, error,typingUsers }=getCollection('messages');
 
     const messages=ref(null);
     const loading = ref(true); 
@@ -68,6 +74,20 @@
     .chat-window{
         background-color: #fafafa;
         padding:30px 20px;
+    }
+    .no_messages{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .typing_user{
+        padding:20px;
+    }
+    .typing_user span{
+        color:rgb(9, 23, 223);
+        box-shadow:0 4px 6px rgb(178, 182, 231);
+        border-radius: 5px;
+        padding:5px;
     }
     .loader{
         display:flex;

@@ -1,11 +1,16 @@
 import { ref,watchEffect } from "vue";
 import { DB } from "@/firebase/config";
-import { collection, query,orderBy,onSnapshot } from "firebase/firestore";
+import { collection, query,orderBy,onSnapshot, where } from "firebase/firestore";
+
+
+import getUser from "./getUser";
+const { user }=getUser();
 
 
 const getCollection=(collectionName)=>{
     const documents=ref(null);
     const error=ref(null);
+    const typingUsers=ref([]);
 
     let colRef=collection(DB,collectionName);
     const q=query(colRef,orderBy('createdAt'));
@@ -27,10 +32,19 @@ const getCollection=(collectionName)=>{
         error.value='Could not fetch data';
     })
 
-    watchEffect((onInvalidate)=>{
-        onInvalidate(()=>unsub())
+    const typingQuery=query(collection(DB,'typingStatuses'),where('isTyping','==',true))
+    const unsubTyping=onSnapshot(typingQuery,(snapshot)=>{
+        typingUsers.value=snapshot.docs.map(doc=>doc.data())
+                                        .filter(typingUser => typingUser.uid !== user.value.uid)
     })
-    return{ documents,error }
+
+    watchEffect((onInvalidate)=>{
+        onInvalidate(()=>{
+            unsub();
+            unsubTyping();
+        })
+    })
+    return{ documents,error,typingUsers }
 }
 
 export default getCollection
