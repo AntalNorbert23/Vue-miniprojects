@@ -8,7 +8,16 @@
                 @keypress.enter.prevent="handleSubmit"
             >
             </textarea>
+            <button @click.prevent="toggleEmojiPicker" class="emoji-button">😊</button>
             <button @click.prevent="handleSubmit" class="send-button">Send</button>
+            
+            <div v-if="showEmojiPicker" class="emoji-picker">
+                <emoji-picker  
+                    @emoji-click="handleEmojiClick" 
+                    @emoji-select="handleEmojiSelect"
+                >
+                </emoji-picker>
+            </div>
         </div>
         <div class="error">{{ error }}</div>
     </form>
@@ -17,6 +26,7 @@
 
 <script setup>
     import { ref } from 'vue';
+    import 'https://cdn.skypack.dev/emoji-picker-element';
 
     import {timestamp} from '@/firebase/config'
     
@@ -27,6 +37,7 @@
     const { addDocToCollection, error,setTypingStatus }=useCollection('messages');
 
     const message=ref('');
+    const showEmojiPicker=ref(false);
 
     const handleSubmit=async ()=>{
         const chat={
@@ -45,6 +56,15 @@
     const handleTyping=()=>{
         setTypingStatus(user.value);
     }
+
+    const toggleEmojiPicker = () => {
+        showEmojiPicker.value = !showEmojiPicker.value;
+    };
+    const handleEmojiClick = (event) => {
+        const emoji=event.detail.unicode;
+        message.value+=emoji;
+        showEmojiPicker.value = false;
+    };
 </script>
 
 <style scoped>
@@ -66,9 +86,25 @@
         display: flex;
         justify-content: flex-center;
         align-items: center;
+        position: relative;
     }
     .send-button {
-    border: none;
-    margin-left:20px;
-}
+        border: none;
+        margin-left:20px;
+    }
+    .emoji-button{
+        padding:10px 12px;
+        border-radius:50%;
+    }
+    .emoji-picker {
+        position: absolute;
+        bottom: 80px; 
+        right: 30px; 
+        width: 400; 
+        height: 400px;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+    }
 </style>
