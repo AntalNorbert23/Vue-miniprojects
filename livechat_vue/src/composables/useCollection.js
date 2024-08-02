@@ -5,7 +5,7 @@ import { collection, addDoc,setDoc,doc, deleteDoc } from "firebase/firestore";
 
 const useCollection=(collectionName)=>{
     const error=ref(null);
-
+    let typingTimeout = null;
     const addDocToCollection=async(doc)=>{
         error.value=null;
 
@@ -22,7 +22,9 @@ const useCollection=(collectionName)=>{
         const typingDocRef=doc(collection(DB,'typingStatuses'),user.uid);
         await setDoc(typingDocRef,{name: user.displayName, uid:user.uid, isTyping:true})
     
-        setTimeout(async() => {
+        if (typingTimeout) clearTimeout(typingTimeout);
+
+        typingTimeout=setTimeout(async() => {
             await deleteDoc(typingDocRef);
         }, 4000);
     }
