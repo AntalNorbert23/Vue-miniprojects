@@ -11,10 +11,9 @@
             <button @click.prevent="toggleEmojiPicker" class="emoji-button">😊</button>
             <button @click.prevent="handleSubmit" class="send-button">Send</button>
             
-            <div v-if="showEmojiPicker" class="emoji-picker">
+            <div v-if="showEmojiPicker" class="emoji-picker" ref="emojiPicker">
                 <emoji-picker  
                     @emoji-click="handleEmojiClick" 
-                    @emoji-select="handleEmojiSelect"
                 >
                 </emoji-picker>
             </div>
@@ -25,7 +24,7 @@
 
 
 <script setup>
-    import { ref } from 'vue';
+    import { ref,onMounted,onBeforeUnmount} from 'vue';
     import 'https://cdn.skypack.dev/emoji-picker-element';
 
     import {timestamp} from '@/firebase/config'
@@ -65,6 +64,24 @@
         message.value+=emoji;
         showEmojiPicker.value = false;
     };
+
+    onMounted(()=>{
+        document.addEventListener('click', handleClickOutside);
+    })
+
+    onBeforeUnmount(()=>{
+        document.removeEventListener('click',handleClickOutside);
+    })
+
+    const handleClickOutside=(event)=>{
+        const picker=document.querySelector('.emoji-picker');
+        const button=document.querySelector('.emoji-button');
+        if(picker && !picker.contains(event.target) &&!button.contains(event.target)){
+            console.log(event.target)
+            showEmojiPicker.value=false;
+        }
+    };
+       
 </script>
 
 <style scoped>
