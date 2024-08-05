@@ -2,7 +2,8 @@
     <form>
         <div class="textarea-container">
             <textarea 
-                placeholder="Type a message and hit enter to send..."
+                :placeholder="placeholderText"
+                :class="{'placeholder-red': isPlaceholderRed}"
                 v-model="message"
                 @input="handleTyping"
                 @keypress.enter.prevent="handleSubmit"
@@ -11,7 +12,7 @@
             <button @click.prevent="toggleEmojiPicker" class="emoji-button">😊</button>
             <button @click.prevent="handleSubmit" class="send-button">Send</button>
             
-            <div v-if="showEmojiPicker" class="emoji-picker" ref="emojiPicker">
+            <div v-if="showEmojiPicker" class="emoji-picker">
                 <emoji-picker  
                     @emoji-click="handleEmojiClick" 
                 >
@@ -37,15 +38,28 @@
 
     const message=ref('');
     const showEmojiPicker=ref(false);
+    const placeholderText = ref('Type a message and hit enter to send...');
+    const isPlaceholderRed = ref(false);
 
     const handleSubmit=async ()=>{
-        const chat={
+        if(message.value !==''){
+
+            const chat={
             message:message.value,
             name:user.value.displayName,
             createdAt:timestamp(),
             uid:user.value.uid,
         }
-        await addDocToCollection(chat);
+            await addDocToCollection(chat);
+        } else{
+            placeholderText.value = "No empty messages!";
+            isPlaceholderRed.value = true;
+            setTimeout(() => {
+                placeholderText.value = "Type a message and hit enter to send...";
+                isPlaceholderRed.value = false;
+            }, 3000);
+        }
+        
 
         if(!error.value){
             message.value='';
@@ -77,7 +91,6 @@
         const picker=document.querySelector('.emoji-picker');
         const button=document.querySelector('.emoji-button');
         if(picker && !picker.contains(event.target) &&!button.contains(event.target)){
-            console.log(event.target)
             showEmojiPicker.value=false;
         }
     };
@@ -123,5 +136,8 @@
         background-color: #fff;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         overflow: auto;
+    }
+    .placeholder-red::placeholder {
+        color: red; 
     }
 </style>
