@@ -1,5 +1,6 @@
-import { AUTH } from "@/firebase/config";
+import { AUTH,DB } from "@/firebase/config";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc,setDoc } from "firebase/firestore";
 import { ref } from "vue";
 import errorCode from "./getErrors";
 import { useToast } from "vue-toast-notification";
@@ -17,6 +18,13 @@ const signUp=async (email, password, displayName)=>{
       }
       await updateProfile(response.user, { displayName });
       error.value=null;
+
+      const userDoc=doc(DB,'users',response.user.uid);
+      await setDoc(userDoc,{
+        uid:response.user.uid,
+        email:response.user.email,
+        displayName:displayName,
+      })
 
       $toast.success("Successfully signed up");
       return response;

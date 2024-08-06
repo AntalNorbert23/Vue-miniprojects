@@ -27,7 +27,7 @@
     const showLogin=ref(true); 
 
     const enterChat=()=>{
-        router.push({name:'chatroom'})
+        router.push({name:'availableusers'})
     }
 
 </script>

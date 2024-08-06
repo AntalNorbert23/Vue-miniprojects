@@ -2,6 +2,7 @@ import Welcome from '@/views/Welcome.vue'
 import ChatRoom from '@/views/chatRoom.vue'
 import { createRouter, createWebHistory } from 'vue-router';
 import { AUTH } from '@/firebase/config';
+import AvailableUsers from '@/components/AvailableUsers.vue';
 
 //route guard-AUTH
 
@@ -29,7 +30,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'welcome', component: Welcome,beforeEnter:requireNoAuth},
-    { path: '/chatroom', name: 'chatroom', component: ChatRoom,beforeEnter:requireAuth},
+    {path:'/chatsAvailable',name:'availableusers',component:AvailableUsers,beforeEnter:requireAuth},
+    { path: '/chatroom/:userId', name: 'chatroom', component: ChatRoom,beforeEnter:requireAuth},
   ]
 })
 

@@ -1,8 +1,8 @@
 <template>
     <div class="container">
         <navbar/>
-        <chatWindow/>
-        <newChatForm/>
+        <chatWindow :chatId="chatId"/>
+        <newChatForm :chatId="chatId"/>
     </div>
 </template>
 
@@ -15,11 +15,13 @@
 
     import { watch } from 'vue';
 
-    import { useRouter } from 'vue-router';
+    import { useRouter, useRoute } from 'vue-router';
     const router=useRouter();
+    const route = useRoute();
 
 
     const{ user }=getUser(); 
+    const chatId = route.params.chatId;
 
     watch(user,()=>{
         if(!user.value){
