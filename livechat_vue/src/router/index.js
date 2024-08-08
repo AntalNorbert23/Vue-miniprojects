@@ -31,7 +31,7 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'welcome', component: Welcome,beforeEnter:requireNoAuth},
     {path:'/chatsAvailable',name:'availableusers',component:AvailableUsers,beforeEnter:requireAuth},
-    { path: '/chatroom/:userId', name: 'chatroom', component: ChatRoom,beforeEnter:requireAuth},
+    { path: '/chatroom/:chatId', name: 'chatroom', component: ChatRoom,beforeEnter:requireAuth,props:true},
   ]
 })
 

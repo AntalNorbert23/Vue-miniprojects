@@ -36,7 +36,12 @@
     import getUser from '@/composables/getUser'
     const { user } = getUser();
 
-    const { documents, error,typingUsers }=getCollection('messages');
+
+    const props=defineProps({
+        chatId:String
+    });
+
+    const { documents, error,typingUsers }=getCollection(`chat_${props.chatId}`);
 
     const messages=ref(null);
     const loading = ref(true); 

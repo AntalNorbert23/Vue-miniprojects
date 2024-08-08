@@ -18,10 +18,10 @@
     import { useRouter, useRoute } from 'vue-router';
     const router=useRouter();
     const route = useRoute();
+    const chatId=route.params.chatId;
 
 
     const{ user }=getUser(); 
-    const chatId = route.params.chatId;
 
     watch(user,()=>{
         if(!user.value){

@@ -14,9 +14,11 @@
     import { collection, getDocs } from 'firebase/firestore';
     import { useRouter } from 'vue-router';
     import { DB } from "@/firebase/config";
+    import getUser from '@/composables/getUser.js';
 
     const users = ref([]);
     const router = useRouter();
+    const { user } = getUser();
 
     const fetchUsers = async () => {
    
@@ -26,8 +28,9 @@
     users.value = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     };
 
-    const enterChat = (userId) => {
-        router.push({ name: 'chatroom', params: { userId } });
+    const enterChat = (otherUserId) => {
+        const chatId = [user.value.uid, otherUserId].sort().join('_');
+        router.push({ name: 'chatroom', params: { chatId } });
     };
 
     onMounted(fetchUsers);

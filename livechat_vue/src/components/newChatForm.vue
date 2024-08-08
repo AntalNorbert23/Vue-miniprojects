@@ -33,8 +33,15 @@
     import getUser from '@/composables/getUser'
     const { user }=getUser();
 
+    const props =defineProps({
+        chatId:{
+            type:String,
+            required:true
+        }
+    })
+
     import useCollection from'@/composables/useCollection'
-    const { addDocToCollection, error,setTypingStatus }=useCollection('messages');
+    const { addDocToCollection, error,setTypingStatus }=useCollection(`chat_${props.chatId}`);
 
     const message=ref('');
     const showEmojiPicker=ref(false);
@@ -43,13 +50,14 @@
 
     const handleSubmit=async ()=>{
         if(message.value !==''){
-
+            const participants=props.chatId ? props.chatId.split('_') : [];
             const chat={
-            message:message.value,
-            name:user.value.displayName,
-            createdAt:timestamp(),
-            uid:user.value.uid,
-        }
+                message:message.value,
+                name:user.value.displayName,
+                createdAt:timestamp(),
+                uid:user.value.uid,
+                participants:participants
+            }
             await addDocToCollection(chat);
         } else{
             placeholderText.value = "No empty messages!";
