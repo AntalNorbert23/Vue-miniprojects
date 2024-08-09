@@ -71,6 +71,7 @@
     })
 
     const messageClass=(message)=>{
+        if(!user.value) return 
         return message.uid === user.value.uid ? 'outgoing' : 'incoming';
     }
 </script>
