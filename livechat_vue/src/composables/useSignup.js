@@ -24,6 +24,7 @@ const signUp=async (email, password, displayName)=>{
         uid:response.user.uid,
         email:response.user.email,
         displayName:displayName,
+        online:false
       })
 
       $toast.success("Successfully signed up");

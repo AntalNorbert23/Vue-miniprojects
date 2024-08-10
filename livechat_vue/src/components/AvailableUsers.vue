@@ -5,7 +5,11 @@
     <ul>
       <li v-for="otherUser in filteredUsers" :key="otherUser.id" @click="enterChat(otherUser.id)">
         {{ otherUser.displayName }}
+
+        <span v-if="otherUser.online" class="online-indicator">Online</span>
+        <span v-else class="offline-indicator">Offline</span>
       </li>
+      
     </ul>
   </div>
 </template>
@@ -13,9 +17,10 @@
 <script setup>
     import navbar from './navbar.vue';
     import { ref, onMounted,computed } from 'vue';
-    import { collection, getDocs } from 'firebase/firestore';
+    import { collection } from 'firebase/firestore';
     import { useRouter } from 'vue-router';
     import { DB } from "@/firebase/config";
+    import { onSnapshot } from "firebase/firestore";
     import getUser from '@/composables/getUser.js';
 
     const users = ref([]);
@@ -25,10 +30,13 @@
     const fetchUsers = async () => {
    
     const usersCollection = collection(DB, 'users');
-    const usersSnapshot = await getDocs(usersCollection);
 
-    users.value = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    onSnapshot(usersCollection, (snapshot) => {
+      users.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      });
     };
+
+
 
     const filteredUsers=computed(()=>{
       if(!users.value || !user.value) return ;
@@ -63,5 +71,13 @@
     li:hover{
       background-color:  #00ffd0;
       font-weight: 800;
+    }
+    .online-indicator {
+     color: green;
+     margin-left: 10px;
+    }
+    .offline-indicator {
+      color: red;
+      margin-left: 10px;
     }
 </style>
