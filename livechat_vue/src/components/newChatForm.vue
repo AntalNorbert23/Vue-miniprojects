@@ -33,6 +33,9 @@
     import getUser from '@/composables/getUser'
     const { user }=getUser();
 
+    import useNotification from '@/composables/useNotification';
+    const { showNotification }=useNotification();
+
     const props =defineProps({
         chatId:{
             type:String,
@@ -59,6 +62,19 @@
                 participants:participants
             }
             await addDocToCollection(chat);
+
+            const otherUser=participants.find(id =>id !== user.value.uid);
+
+            if (otherUser){
+                showNotification('New Message',{
+                    body:`${user.value.displayName} sent a message.`,
+                    data:{ chatId: props.chatId },
+                    onClick:()=>{
+                        router.push({name:'chatroom', params: {chatId: props.chatId}})
+                    }
+                })
+            }
+
         } else{
             placeholderText.value = "No empty messages!";
             isPlaceholderRed.value = true;

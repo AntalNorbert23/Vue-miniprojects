@@ -8,6 +8,9 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { DB } from '@/firebase/config';
 import { AUTH } from '@/firebase/config';
 
+import useNotification from '@/composables/useNotification';
+const { requestNotificationPermission } = useNotification();
+
 const user = ref(AUTH.currentUser);
 const inactivity_timer = 5 * 60 * 1000; 
 
@@ -46,6 +49,7 @@ const stopTrackingActivity = () => {
 };
 
 onMounted(() => {
+  requestNotificationPermission();
   setActive(); 
   trackActivity(); 
   resetActivityTimeout(); 
@@ -54,5 +58,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopTrackingActivity();
   clearTimeout(activityTimeout); 
+  setInactive();
 });
 </script>
