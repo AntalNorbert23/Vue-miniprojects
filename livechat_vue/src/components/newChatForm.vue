@@ -10,7 +10,14 @@
             >
             </textarea>
             <button @click.prevent="toggleEmojiPicker" class="emoji-button">😊</button>
+            <button @click.prevent="triggerFileInput" class="upload-button">📷</button>
             <button @click.prevent="handleSubmit" class="send-button">Send</button>
+            <input 
+                type="file" 
+                ref="fileInput"
+                @change="handleFileChange"
+                style="display: none;"
+            />
             
             <div v-if="showEmojiPicker" class="emoji-picker">
                 <emoji-picker  
@@ -36,6 +43,9 @@
     import useNotification from '@/composables/useNotification';
     const { showNotification }=useNotification();
 
+    import { storage } from '@/firebase/config';
+    import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+
     const props =defineProps({
         chatId:{
             type:String,
@@ -50,21 +60,35 @@
     const showEmojiPicker=ref(false);
     const placeholderText = ref('Type a message and hit enter to send...');
     const isPlaceholderRed = ref(false);
+    const fileInput = ref(null);
+    const fileName = ref('');
+    const file = ref(null);
+
 
     const handleSubmit=async ()=>{
         if(message.value !==''){
             const participants=props.chatId ? props.chatId.split('_') : [];
-            const chat={
+            let chat={
                 message:message.value,
                 name:user.value.displayName,
                 createdAt:timestamp(),
                 uid:user.value.uid,
                 participants:participants
             }
+
+            if (file.value) {
+                const fileRef = storageRef(storage, `chat_files/${Date.now()}_${file.value.name}`);
+                const uploadResult = await uploadBytes(fileRef, file.value);
+                const fileURL = await getDownloadURL(uploadResult.ref);
+                chat = { ...chat, fileURL:fileURL, fileName: file.value.name };
+                file.value = null;
+                fileName.value = '';
+            }
             await addDocToCollection(chat);
 
             const otherUser=participants.find(id =>id !== user.value.uid);
-
+            console.log(otherUser)
+            console.log(user.value.uid)
             if (otherUser){
                 showNotification('New Message',{
                     body:`${user.value.displayName} sent a message.`,
@@ -101,6 +125,16 @@
         const emoji=event.detail.unicode;
         message.value+=emoji;
         showEmojiPicker.value = false;
+    };
+
+    const handleFileChange = (event) => {
+        file.value = event.target.files[0];
+        fileName.value = file.value ? file.value.name : '';
+        message.value = `Selected file: ${fileName.value}`; 
+    };
+
+    const triggerFileInput = () => {
+        fileInput.value.click();
     };
 
     onMounted(()=>{
@@ -149,6 +183,7 @@
     .emoji-button{
         padding:10px 12px;
         border-radius:50%;
+        margin-left:10px;
     }
     .emoji-picker {
         position: absolute;
@@ -163,5 +198,9 @@
     }
     .placeholder-red::placeholder {
         color: red; 
+    }
+    .upload-button{
+        padding:10px;
+        margin-left:10px;
     }
 </style>

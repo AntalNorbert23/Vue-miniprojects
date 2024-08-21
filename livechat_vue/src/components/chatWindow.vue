@@ -10,7 +10,17 @@
             <div v-for="doc in formattedDocuments" :key="doc.id" class="single" :class="messageClass(doc)">
                 <span class="created-at">{{ doc.createdAt }}</span>
                 <span class="name">{{ doc.name }}</span>
-                <span class="message">{{ doc.message }}</span>
+                <span class="message" v-if="!doc.fileURL">{{ doc.message }}</span>
+                <div>
+                    <div v-if="doc.fileURL">
+                        <div v-if="isImage(doc.fileURL)" >
+                            <a :href="doc.fileURL" target="_blank"><img :src="doc.fileURL" :alt="doc.fileName" class="chat-image"/></a>
+                        </div>
+                        <div v-else>
+                            <a :href="doc.fileURL" target="_blank">{{ doc.fileName }}</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div v-else class="no_messages">
@@ -74,6 +84,12 @@
         if(!user.value) return 
         return message.uid === user.value.uid ? 'outgoing' : 'incoming';
     }
+
+    const isImage = (url) => {
+        const decodedUrl = decodeURIComponent(url);
+
+        return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(decodedUrl.split('?')[0]);
+    };
 </script>
 
 <style scoped>
@@ -144,8 +160,9 @@
         margin-right:6px;
         padding-left:3px;
     }
-    .messages{
-        max-height:400px;
-        overflow: auto;
+    .chat-image {
+        width:300px;
+        height: 50%;
+        border-radius: 8px;
     }
 </style>
