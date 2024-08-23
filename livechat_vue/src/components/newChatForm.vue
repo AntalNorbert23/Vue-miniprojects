@@ -41,7 +41,7 @@
     const { user }=getUser();
 
     import useNotification from '@/composables/useNotification';
-    const { showNotification }=useNotification();
+    const { addNotification }=useNotification();
 
     import { storage } from '@/firebase/config';
     import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -87,16 +87,18 @@
             await addDocToCollection(chat);
 
             const otherUser=participants.find(id =>id !== user.value.uid);
-            console.log(otherUser)
-            console.log(user.value.uid)
+          
             if (otherUser){
-                showNotification('New Message',{
-                    body:`${user.value.displayName} sent a message.`,
-                    data:{ chatId: props.chatId },
-                    onClick:()=>{
-                        router.push({name:'chatroom', params: {chatId: props.chatId}})
-                    }
-                })
+                const notification = {
+                    recipientId: otherUser,
+                    title: 'New Message',
+                    body: `${user.value.displayName} sent you a message.`,
+                    chatId: props.chatId,
+                    read: false,
+                    createdAt: timestamp()
+                };
+
+            await addNotification(notification);  
             }
 
         } else{

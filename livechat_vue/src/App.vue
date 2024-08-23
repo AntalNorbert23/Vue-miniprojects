@@ -4,12 +4,16 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { DB } from '@/firebase/config';
 import { AUTH } from '@/firebase/config';
+import { useRouter } from 'vue-router';
 
 import useNotification from '@/composables/useNotification';
-const { requestNotificationPermission } = useNotification();
+const {showNotification, requestNotificationPermission } = useNotification();
+
+const router = useRouter();
+let unsubscribe = null;
 
 const user = ref(AUTH.currentUser);
 const inactivity_timer = 5 * 60 * 1000; 
@@ -53,11 +57,39 @@ onMounted(() => {
   setActive(); 
   trackActivity(); 
   resetActivityTimeout(); 
+
+  if (user.value) {
+    const notificationsRef = collection(DB, 'notifications');
+    const q = query(notificationsRef, where('recipientId', '==', user.value.uid), where('read', '==', false));
+
+    unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === 'added') {
+          const notification = change.doc.data();
+
+          showNotification(notification.title, {
+            body: notification.body,
+            data: { chatId: notification.chatId },
+            onClick: () => {
+              router.push({ name: 'chatroom', params: { chatId: notification.chatId } });
+            }
+          });
+
+          
+          const notificationDocRef = doc(DB, 'notifications', change.doc.id);
+          updateDoc(notificationDocRef, { read: true });
+        }
+      });
+    });
+  }
 });
 
 onUnmounted(() => {
   stopTrackingActivity();
   clearTimeout(activityTimeout); 
   setInactive();
+  if (unsubscribe) {
+    unsubscribe();
+  }
 });
 </script>

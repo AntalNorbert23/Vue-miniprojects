@@ -1,4 +1,5 @@
-
+import { collection,addDoc } from "firebase/firestore";
+import { DB } from "@/firebase/config";
 import { ref } from "vue";
 
 const notificationPermission=ref(Notification.permission);
@@ -25,7 +26,11 @@ const showNotification=(title,options)=>{
     }
 }
 
+const addNotification = async (notification) => {
+    const notificationsRef = collection(DB, 'notifications');
+    await addDoc(notificationsRef, notification);
+}
 
 export default function useNotification(){
-    return {requestNotificationPermission,showNotification}
+    return {requestNotificationPermission,showNotification,addNotification}
 }
