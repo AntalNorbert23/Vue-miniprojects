@@ -2,6 +2,10 @@ import { AUTH } from "@/firebase/config";
 import { signOut } from "firebase/auth";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
+import useActivityTracking from '@/composables/useActivityTracking';
+import getUser from "./getUser";
+const {user}=getUser();
+
 
 const $toast =useToast();
 
@@ -11,7 +15,14 @@ const logout=async ()=>{
     error.value=null;
 
     try{
-        await signOut(AUTH);
+        if(user.value){
+            const {setInactive,stopTrackingActivity}=useActivityTracking();
+            stopTrackingActivity();
+            await setInactive();
+           
+            await signOut(AUTH);
+        }
+         
         $toast.success('Successfully logged out')
     }
     catch(err) {

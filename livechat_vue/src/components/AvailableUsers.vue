@@ -16,30 +16,27 @@
 
 <script setup>
     import navbar from './navbar.vue';
-    import { ref, onMounted,computed } from 'vue';
-    import { collection } from 'firebase/firestore';
+    import { ref, onMounted,onUnmounted,computed } from 'vue';
+    import { collection,onSnapshot } from 'firebase/firestore';
     import { useRouter } from 'vue-router';
     import { DB } from "@/firebase/config";
-    import { onSnapshot } from "firebase/firestore";
     import getUser from '@/composables/getUser.js';
 
     const users = ref([]);
     const router = useRouter();
     const { user } = getUser();
+    let unsubscribe = null;
 
     const fetchUsers = async () => {
-   
-    const usersCollection = collection(DB, 'users');
+      const usersCollection = collection(DB, 'users');
 
-    onSnapshot(usersCollection, (snapshot) => {
-      users.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      unsubscribe=onSnapshot(usersCollection, (snapshot) => {
+        users.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       });
     };
 
-
-
     const filteredUsers=computed(()=>{
-      if(!users.value || !user.value) return ;
+      if(!users.value || !user.value) return [];
       return users.value.filter(otherUser=>otherUser.id !== user.value.uid)
     })
 
@@ -49,6 +46,12 @@
     };
 
     onMounted(fetchUsers);
+
+    onUnmounted(() => {
+    if (unsubscribe) {
+        unsubscribe(); 
+    }
+});
 </script>
 
 <style scoped>

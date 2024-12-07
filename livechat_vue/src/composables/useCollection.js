@@ -26,7 +26,7 @@ const useCollection=(collectionName)=>{
 
         typingTimeout=setTimeout(async() => {
             await deleteDoc(typingDocRef);
-        }, 4000);
+        }, 1000);
     }
     return { error, addDocToCollection,setTypingStatus }
 }
