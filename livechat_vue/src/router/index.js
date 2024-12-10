@@ -16,20 +16,10 @@ const requireAuth=(to,from,next)=>{
   
 }
 
-//route guard-login
-const requireNoAuth=(to,from,next)=>{
-  let user=AUTH.currentUser;
-  if(user){
-    next({name:'chatroom'});
-  }else{
-    next();
-  }
-}
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'welcome', component: Welcome,beforeEnter:requireNoAuth},
+    { path: '/', name: 'welcome', component: Welcome},
     {path:'/chatsAvailable',name:'availableusers',component:AvailableUsers,beforeEnter:requireAuth},
     { path: '/chatroom/:chatId', name: 'chatroom', component: ChatRoom,beforeEnter:requireAuth,props:true},
   ]

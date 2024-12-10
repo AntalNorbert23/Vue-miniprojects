@@ -5,6 +5,7 @@ import { useToast } from "vue-toast-notification";
 import useActivityTracking from '@/composables/useActivityTracking';
 import getUser from "./getUser";
 const {user}=getUser();
+import { stopListeningToUsers } from "./useUsers";
 
 
 const $toast =useToast();
@@ -18,8 +19,9 @@ const logout=async ()=>{
         if(user.value){
             const {setInactive,stopTrackingActivity}=useActivityTracking();
             stopTrackingActivity();
+
+            stopListeningToUsers();
             await setInactive();
-           
             await signOut(AUTH);
         }
          

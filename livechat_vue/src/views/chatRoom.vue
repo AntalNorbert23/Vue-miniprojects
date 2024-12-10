@@ -1,13 +1,13 @@
 <template>
     <div class="container">
-        <navbar/>
+        <Navbar/>
         <chatWindow :chatId="chatId"/>
         <newChatForm :chatId="chatId"/>
     </div>
 </template>
 
 <script setup>
-    import navbar from '@/components/navbar.vue'
+    import Navbar from '@/components/Navbar.vue'
     import getUser from '@/composables/getUser';
 
     import newChatForm from '@/components/newChatForm.vue';
