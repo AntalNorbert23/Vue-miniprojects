@@ -3,9 +3,10 @@ import ChatRoom from '@/views/chatRoom.vue'
 import { createRouter, createWebHistory } from 'vue-router';
 import { AUTH } from '@/firebase/config';
 import AvailableUsers from '@/components/AvailableUsers.vue';
+import { useLoader } from '@/composables/useLoading';
+const { setLoading } = useLoader();
 
 //route guard-AUTH
-
 const requireAuth=(to,from,next)=>{
   let user=AUTH.currentUser;
   if(!user){
@@ -23,6 +24,15 @@ const router = createRouter({
     {path:'/chatsAvailable',name:'availableusers',component:AvailableUsers,beforeEnter:requireAuth},
     { path: '/chatroom/:chatId', name: 'chatroom', component: ChatRoom,beforeEnter:requireAuth,props:true},
   ]
+})
+
+router.beforeEach((to,from,next)=>{
+  setLoading(true);
+  next();
+})
+
+router.afterEach(()=>{
+  setLoading(false);
 })
 
 export default router

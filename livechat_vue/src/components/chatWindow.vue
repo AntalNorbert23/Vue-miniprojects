@@ -1,6 +1,6 @@
 <template>
     <div class="chat-window">
-        <div v-if="loading" class="loader">
+        <div v-if="isloading">
             <Loader />
         </div>
         <div v-else-if="documents && documents.length>0"
@@ -43,6 +43,9 @@
     import getCollection from '@/composables/getCollection';
     import { formatDistanceToNow } from 'date-fns';
 
+    import { useLoader } from '@/composables/useLoading';
+    const { isLoading } = useLoader();
+
     import getUser from '@/composables/getUser'
     const { user } = getUser();
 
@@ -54,13 +57,14 @@
     const { documents, error,typingUsers }=getCollection(`chat_${props.chatId}`);
 
     const messages=ref(null);
-    const loading = ref(true); 
 
-    watchEffect(()=>{
-        if(documents.value!==null){
-            loading.value=false;
+    watchEffect(() => {
+        if (documents.value) {
+            isLoading.value = false; // Stop loader
+        } else {
+            isLoading.value = true; // Show loader
         }
-    })
+    });
     
 
     onUpdated(()=>{

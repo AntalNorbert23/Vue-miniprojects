@@ -16,7 +16,9 @@
 <script setup>
     import { ref,computed } from 'vue';
     import useLogin from '@/composables/useLogin';
-    
+    import { useLoader } from '@/composables/useLoading';
+    const { setLoading } =useLoader()
+
     const email=ref('');
     const password=ref('');
     const emit=defineEmits(['login']);
@@ -34,7 +36,9 @@
     }
 
     const handleSubmit= async ()=>{
+        setLoading(true);
         await login(email.value, password.value);
+        setLoading(false)
         if(!error.value){
             emit('login');
         }
