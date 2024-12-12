@@ -35,12 +35,29 @@ export default function useActivityTracking() {
         window.addEventListener('mousemove', resetActivityTimeout);
         window.addEventListener('keypress', resetActivityTimeout);
         window.addEventListener('scroll', resetActivityTimeout);
+        window.addEventListener('visibilitychange', handleTabVisibilityChange);
+        resetActivityTimeout(); 
     };
 
     const stopTrackingActivity = () => {
         window.removeEventListener('mousemove', resetActivityTimeout);
         window.removeEventListener('keypress', resetActivityTimeout);
         window.removeEventListener('scroll', resetActivityTimeout);
+        window.removeEventListener('visibilitychange', handleTabVisibilityChange);
+        clearTimeout(activityTimeout);
+    };
+
+    // If the tab becomes hidden, mark user as offline
+    const handleTabVisibilityChange = () => {
+        if (document.hidden) setInactive();
+    };
+
+    //marks user offline/online status
+    const trackExistingUser = async () => {
+        if (user.value) {
+            await setActive(); // Mark user as online
+            trackActivity(); // Start tracking activity
+        }
     };
 
     return {
@@ -49,5 +66,6 @@ export default function useActivityTracking() {
         resetActivityTimeout,
         trackActivity,
         stopTrackingActivity,
+        trackExistingUser
     };
 }

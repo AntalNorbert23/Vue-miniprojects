@@ -3,15 +3,16 @@ import { AUTH } from "@/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 
 
-const user =ref(AUTH.currentUser);
+const user =ref(null);
 
-onAuthStateChanged(AUTH,(_user)=>{
-    user.value=_user;
+onAuthStateChanged(AUTH,(authUser)=>{
+    if(authUser){
+        user.value = authUser;
+    } else {
+        user.value = null;
+    }
 })
 
-const getUser=()=>{
-    return { user }
+export default function getUser() {
+    return { user };
 }
-
-
-export default getUser

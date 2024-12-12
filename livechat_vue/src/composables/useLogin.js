@@ -15,10 +15,10 @@ const login = async (email,password)=>{
         const response= await signInWithEmailAndPassword(AUTH,email,password);
         error.value=null;
 
-         const {setActive,trackActivity,resetActivityTimeout}=useActivityTracking();
+         const {setActive,trackExistingUser}=useActivityTracking();
          await setActive();
-         trackActivity()
-         resetActivityTimeout();
+         trackExistingUser();
+
         
         $toast.success("Successfully logged in");
         return response;

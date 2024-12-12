@@ -22,10 +22,9 @@ const logout=async ()=>{
         if(user.value){
             const {setInactive,stopTrackingActivity}=useActivityTracking();
             
-
-            stopListeningToUsers();
             await setInactive();
-            
+            stopListeningToUsers();
+            stopTrackingActivity();
             await signOut(AUTH);
             setLoading(false);
         }
