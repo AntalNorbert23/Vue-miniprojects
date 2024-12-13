@@ -1,5 +1,8 @@
 
 <template>
+    <div v-if="isLoading" class="loader-container">
+        <Loader  size="small" />
+    </div>
     <ul>
         <!-- Show the user list to the logged user so it can chat with the user showed ( all users thhat have account) -->
         <li v-for="otherUser in filteredUsers" :key="otherUser.id" @click="handleEnterChat(otherUser.id)">
@@ -18,6 +21,10 @@
 
     import getUser from '@/composables/getUser.js';
     import { fetchUsers, filteredUsers } from '@/composables/useUsers';
+    import Loader from './Loader.vue';
+
+    import { useLoader } from '@/composables/useLoading';
+    const { isLoading } = useLoader();
 
     //fetching users list
     fetchUsers();
@@ -31,6 +38,23 @@
 </script>
 
 <style scoped>
+    .loader-container-big{
+      position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height: 100%;
+        background-color: rgba(128, 128, 128, 0.697);
+        z-index: 1;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .loader-container{
+        display:flex;
+        justify-content: center;
+        align-items: center;
+    }
     ul {
       list-style-type: none;
       padding: 15px;

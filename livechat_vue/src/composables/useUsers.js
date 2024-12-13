@@ -5,13 +5,22 @@ import { DB } from '@/firebase/config';
 
 let unsubscribe;
 const users=ref([]);
+const isLoaded = ref(false);
 const { user } = getUser();
 
+import { useLoader } from '@/composables/useLoading';
+const { setLoading } = useLoader();
+
 export const fetchUsers =  () => {
+    if (isLoaded.value) return { users };
+
+    setLoading(true);
     const usersCollection = collection(DB, 'users');
 
     const unsubscribe = onSnapshot(usersCollection, (snapshot) => {
       users.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLoading(false);
+      isLoaded.value=true;
     });
 
     onScopeDispose(() => {

@@ -7,7 +7,7 @@ import getUser from "./getUser";
 const {user}=getUser();
 import { stopListeningToUsers } from "./useUsers";
 import { useLoader } from "./useLoading";
-const {setLoading} = useLoader();
+const {setLogoutLoading} = useLoader();
 
 const $toast =useToast();
 
@@ -17,7 +17,7 @@ const logout=async ()=>{
     error.value=null;
 
     try{
-        setLoading(true);
+        setLogoutLoading(true);
         if (!user.value) return;
         if(user.value){
             const {setInactive,stopTrackingActivity}=useActivityTracking();
@@ -26,7 +26,7 @@ const logout=async ()=>{
             stopListeningToUsers();
             stopTrackingActivity();
             await signOut(AUTH);
-            setLoading(false);
+            setLogoutLoading(false);
         }
          
         $toast.success('Successfully logged out')

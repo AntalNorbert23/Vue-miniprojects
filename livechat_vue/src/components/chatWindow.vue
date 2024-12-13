@@ -1,6 +1,6 @@
 <template>
     <div class="chat-window">
-        <div v-if="isloading">
+        <div v-if="isLoading" class="loader-container">
             <Loader />
         </div>
         <div v-else-if="documents && documents.length>0"
@@ -115,7 +115,7 @@
         border-radius: 5px;
         padding:5px;
     }
-    .loader{
+    .loader-container{
         display:flex;
         justify-content: center;
         align-items: center;

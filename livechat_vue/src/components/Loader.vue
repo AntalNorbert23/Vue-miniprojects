@@ -1,38 +1,77 @@
 <template>
-  <div v-if="isLoading" class="loader-container">
-      <div class="loader"></div>
-  </div>
-</template>
-
-<script setup>
-    import { useLoader } from '@/composables/useLoading';
-    const {isLoading} = useLoader();
-
-</script>
-<style scoped>
-    .loader-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(107, 101, 101, 0.7);
-        z-index: 1000;
-    }
-    .loader {
-        border: 16px solid #f3f3f3;
-        border-radius: 50%;
-        border-top: 16px solid #0000ff;
-        width: 100px;
-        height: 100px;
-        animation: spin 2s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-</style>
+    <div 
+      :class="loaderClasses"
+      :style="loaderStyles"
+    ></div>
+  </template>
+  
+  <script setup>
+      import { computed } from 'vue';
+  
+      const { size, fullPage, color, speed } = defineProps({
+      size: {
+          type: String,
+          default: 'medium',
+          validator: value => ['small', 'medium', 'large'].includes(value)
+      },
+      fullPage: {
+          type: Boolean,
+          default: false
+      },
+      color: {
+          type: String,
+          default: '#3498db'
+      },
+      speed: {
+          type: [Number, String],
+          default: 2
+      }
+      });
+  
+     const loaderClasses = computed (()=>({
+          loader: true,
+          'loader--small': size === 'small',
+          'loader--medium': size === 'medium',
+          'loader--large': size === 'large',
+          'loader--full-page': fullPage,
+     }));
+  
+     const loaderStyles = computed(()=>({
+          borderTopColor: color,
+          animationDuration: `${speed}`
+     }))
+  
+  </script>
+  
+  <style scoped>
+      .loader {
+          border: 8px solid #f3f3f3;
+          border-radius: 50%;
+          border-top: 8px solid #3498db; 
+          animation: spin 2s linear infinite; 
+      }
+      .loader--small {
+          width: 30px;
+          height: 30px;
+          border-width: 4px;
+      }
+      .loader--medium {
+          width: 60px;
+          height: 60px;
+          border-width: 6px;
+      }
+      .loader--large {
+          width: 100px;
+          height: 100px;
+          border-width: 8px;
+      }
+      .loader--full-page {
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+      }
+      @keyframes spin {
+          0% { transform: rotate(0deg) }
+          100% { transform: rotate(360deg) }
+      }
+  </style>
