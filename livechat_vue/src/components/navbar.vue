@@ -22,9 +22,11 @@
 
     const handleLogout=async()=>{
         await logout();
-        router.push({name:'welcome'})
+        user.value=null;
+        
         if(!error.value){
             console.log('user logged out ');
+            router.push({name:'welcome'})
         }
     }
 </script>

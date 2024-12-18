@@ -14,9 +14,10 @@ import useActivityTracking from '@/composables/useActivityTracking';
 import Loader from './components/Loader.vue';
 
 import { useLoader } from './composables/useLoading';
+import { stopListeningToUsers } from './composables/useUsers';
 const { isLoggingOut } =useLoader();
 
-const { trackExistingUser, stopTrackingActivity } = useActivityTracking();
+const { setActive,trackExistingUser, stopTrackingActivity } = useActivityTracking();
 
 onAuthStateChanged(AUTH, (user) => {
   if (user) {
@@ -24,6 +25,7 @@ onAuthStateChanged(AUTH, (user) => {
     trackExistingUser();
   } else {
     // If user is logged out, stop all tracking
+    stopListeningToUsers();
     stopTrackingActivity();
   }
 });

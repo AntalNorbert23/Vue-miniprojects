@@ -1,16 +1,29 @@
+//firebase imports
 import { AUTH } from "@/firebase/config";
 import { signOut } from "firebase/auth";
+
+//vue imports
 import { ref } from "vue";
+
+//toast-notification import
 import { useToast } from "vue-toast-notification";
-import useActivityTracking from '@/composables/useActivityTracking';
+
+//current user import
 import getUser from "./getUser";
-const {user}=getUser();
-import { stopListeningToUsers } from "./useUsers";
+
+//import for loader on logout
 import { useLoader } from "./useLoading";
-const {setLogoutLoading} = useLoader();
 
+//import for tracking user activity, setting user inactive
+import useActivityTracking from "./useActivityTracking";
+
+//use imports
 const $toast =useToast();
+const {user}=getUser();
+const {setLogoutLoading} = useLoader();
+const {setInactive} = useActivityTracking();
 
+//constants
 const error=ref(null);
 
 const logout=async ()=>{
@@ -18,23 +31,20 @@ const logout=async ()=>{
 
     try{
         setLogoutLoading(true);
-        if (!user.value) return;
         if(user.value){
-            const {setInactive,stopTrackingActivity}=useActivityTracking();
-            
+            //set user inactive
             await setInactive();
-            stopListeningToUsers();
-            stopTrackingActivity();
-            await signOut(AUTH);
-            setLogoutLoading(false);
         }
-         
+        //sign out from firebase
+        await signOut(AUTH);
         $toast.success('Successfully logged out')
     }
-    catch(err) {
+    catch(err) { 
         console.log(err)
         error.value=err.message
         $toast.error("Something happened try again")
+    }finally{
+        setLogoutLoading(false);
     }
 }
 

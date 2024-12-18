@@ -1,24 +1,29 @@
+//imports from firebase
 import { AUTH } from "@/firebase/config";
-import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ref } from "vue";
-import errorCode from "./getErrors";
-import { useToast } from "vue-toast-notification";
-import useActivityTracking from '@/composables/useActivityTracking';
+import { signInWithEmailAndPassword } from "firebase/auth";
 
+//imports from vue
+import { ref } from "vue";
+
+//import errors
+import errorCode from "./getErrors";
+
+//toast import 
+import { useToast } from "vue-toast-notification";
+
+//use imports
+const $toast=useToast();
+
+//constants
 const error =ref(null);
 
 const login = async (email,password)=>{
-    const $toast=useToast();
     error.value=null;
 
     try{
+        //login with email and password firebase
         const response= await signInWithEmailAndPassword(AUTH,email,password);
         error.value=null;
-
-         const {setActive,trackExistingUser}=useActivityTracking();
-         await setActive();
-         trackExistingUser();
-
         
         $toast.success("Successfully logged in");
         return response;
