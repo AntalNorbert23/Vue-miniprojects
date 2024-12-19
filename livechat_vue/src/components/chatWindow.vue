@@ -1,5 +1,14 @@
 <template>
     <div class="chat-window">
+        
+            <div class="user-status">
+                <li v-for="otherUser in filteredUser" :key="otherUser.id" @click="handleEnterChat(otherUser)">
+                    <span v-if="otherUser.online" class="online-indicator"></span>
+                    <span v-else class="offline-indicator"></span>
+                    {{ otherUser.displayName }}
+                </li>
+            </div>
+       
         <div v-if="isLoading" class="loader-container">
             <Loader />
         </div>
@@ -38,7 +47,7 @@
 <script setup>
     import Loader from '@/components/Loader.vue'
 
-    import { computed,ref,onUpdated,watchEffect } from 'vue';
+    import { computed,ref,onUpdated,watchEffect, onMounted } from 'vue';
 
     import getCollection from '@/composables/getCollection';
     import { formatDistanceToNow } from 'date-fns';
@@ -48,7 +57,20 @@
 
     import getUser from '@/composables/getUser'
     const { user } = getUser();
+    import { useRoute } from 'vue-router'
+    const route =useRoute();
 
+    const otherUserId = route.query.otherUserId;
+    import { useUsers } from '@/composables/useUsers';
+
+    const {users,fetchUsers}=useUsers();
+
+   
+    const filteredUser=computed(()=>{
+        if(!users.value || !user.value) return [];
+        
+        return users.value.filter(otherUser=>otherUser.id == otherUserId);
+    })
 
     const props=defineProps({
         chatId:String
@@ -94,9 +116,43 @@
 
         return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(decodedUrl.split('?')[0]);
     };
+
+    onMounted(()=>{
+        fetchUsers();
+    })
 </script>
 
 <style scoped>
+    .user-status {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 10px;
+        background-color: #f4f4f9;
+        position: relative;
+        top:-30px;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .online-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #00cc66; 
+        display: inline-block;
+        margin-right: 8px;
+    }
+    li{
+        display: inline;
+    }
+    .offline-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #cc0000; 
+        display: inline-block;
+        margin-right: 8px;
+    }
     .chat-window{
         background-color: #fafafa;
         padding:30px 20px;

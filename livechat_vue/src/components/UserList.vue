@@ -5,7 +5,7 @@
     </div>
     <ul>
         <!-- Show the user list to the logged user so it can chat with the user showed ( all users thhat have account) -->
-        <li v-for="otherUser in filteredUsers" :key="otherUser.id" @click="handleEnterChat(otherUser.id)">
+        <li v-for="otherUser in filteredUsers" :key="otherUser.id" @click="handleEnterChat(otherUser)">
           {{ otherUser.displayName }}
     
           <span v-if="otherUser.online" class="online-indicator">Online</span>
@@ -20,6 +20,7 @@
     const router = useRouter();
 
     import getUser from '@/composables/getUser.js';
+    const { user } = getUser();
     import { fetchUsers, filteredUsers } from '@/composables/useUsers';
     import Loader from './Loader.vue';
 
@@ -28,12 +29,12 @@
 
     //fetching users list
     fetchUsers();
-    const { user } = getUser();
+    
 
      // function that handles entering the chat
-     const handleEnterChat = (otherUserId) => {
-        const chatId = [user.value.uid, otherUserId].sort().join('_');
-        router.push({ name: 'chatroom', params: { chatId } });
+     const handleEnterChat = (otherUser) => {
+        const chatId = [user.value.uid, otherUser.id].sort().join('_');
+        router.push({ name: 'chatroom', params: { chatId }, query:{otherUserId:otherUser.id} });
     };
 </script>
 

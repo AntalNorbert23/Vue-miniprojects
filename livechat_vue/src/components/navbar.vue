@@ -12,7 +12,6 @@
 <script setup>
     import useLogout from '@/composables/useLogout';
     import getUser from '@/composables/getUser';
-
     const { logout, error }=useLogout();
     const { user }=getUser();
 
@@ -20,6 +19,7 @@
     const route=useRoute();
     const router=useRouter();
 
+    
     const handleLogout=async()=>{
         await logout();
         user.value=null;

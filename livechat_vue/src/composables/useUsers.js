@@ -12,20 +12,20 @@ import { useLoader } from '@/composables/useLoading';
 const { setLoading } = useLoader();
 
 export const fetchUsers =  () => {
-    if (isLoaded.value) return { users };
+    if (isLoaded.value && unsubscribe) return { users };
 
     setLoading(true);
     const usersCollection = collection(DB, 'users');
 
-    const unsubscribe = onSnapshot(usersCollection, (snapshot) => {
+      unsubscribe = onSnapshot(usersCollection, (snapshot) => {
       users.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setLoading(false);
       isLoaded.value=true;
     });
 
-    onScopeDispose(() => {
-        unsubscribe();
-      });
+    // onScopeDispose(() => {
+    //    stopListeningToUsers();
+    //   });
 
     return {users};
 }
@@ -38,6 +38,16 @@ export const filteredUsers=computed(()=>{
   export const stopListeningToUsers = () => {
     if (unsubscribe) {
       unsubscribe();
-      unsubscribe = null; 
+      unsubscribe = null;
+      users.value = [];
+      isLoaded.value = false;
     }
   };
+
+  export const useUsers = () => {
+    return {
+        users,
+        filteredUsers,
+        fetchUsers
+    };
+};
