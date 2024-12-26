@@ -73,7 +73,8 @@
                 name:user.value.displayName,
                 createdAt:timestamp(),
                 uid:user.value.uid,
-                participants:participants
+                participants:participants,
+                status:'sent'
             }
 
             if (file.value) {

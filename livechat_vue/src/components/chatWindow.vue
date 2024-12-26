@@ -16,10 +16,11 @@
             class="messages"
             ref="messages"
         >
-            <div v-for="doc in formattedDocuments" :key="doc.id" class="single" :class="messageClass(doc)">
+            <div v-for="(doc,index) in formattedDocuments" :key="doc.id" class="single" :class="messageClass(doc)" @mouseenter="markAsSeen(doc)" :ref="el => { messageRefs[index] = el }">
                 <span class="created-at">{{ doc.createdAt }}</span>
                 <span class="name">{{ doc.name }}</span>
                 <span class="message" v-if="!doc.fileURL">{{ doc.message }}</span>
+                <span v-if="doc.uid === currentUser.uid" class="status">{{ doc.status }}</span>
                 <div>
                     <div v-if="doc.fileURL">
                         <div v-if="isImage(doc.fileURL)" >
@@ -47,7 +48,7 @@
 <script setup>
     import Loader from '@/components/Loader.vue'
 
-    import { computed,ref,onUpdated,watchEffect, onMounted } from 'vue';
+    import { computed,ref,onUpdated,watchEffect, onMounted,onBeforeUnmount } from 'vue';
 
     import getCollection from '@/composables/getCollection';
     import { formatDistanceToNow } from 'date-fns';
@@ -61,7 +62,10 @@
     const route =useRoute();
 
     const otherUserId = route.query.otherUserId;
+    const currentUser = computed(() => user.value);
     import { useUsers } from '@/composables/useUsers';
+    import { DB } from '@/firebase/config';
+    import { updateDoc,doc } from 'firebase/firestore';
 
     const {users,fetchUsers}=useUsers();
 
@@ -79,6 +83,7 @@
     const { documents, error,typingUsers }=getCollection(`chat_${props.chatId}`);
 
     const messages=ref(null);
+    const messageRefs = ref([]); 
 
     watchEffect(() => {
         if (documents.value) {
@@ -106,6 +111,18 @@
         }
     })
 
+    const markAsSeen = async (messageDoc) => {
+        if (messageDoc.status !== 'seen' && messageDoc.uid !== user.value.uid) {
+            const messageRef = doc(DB, `chat_${props.chatId}/${messageDoc.id}`);
+
+            try {
+                await updateDoc(messageRef, { status: 'seen' });
+            } catch (error) {
+                console.error('Failed to mark message as seen:', error);
+            }
+        }
+    };
+
     const messageClass=(message)=>{
         if(!user.value) return 
         return message.uid === user.value.uid ? 'outgoing' : 'incoming';
@@ -117,9 +134,51 @@
         return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(decodedUrl.split('?')[0]);
     };
 
-    onMounted(()=>{
-        fetchUsers();
-    })
+    watchEffect(() => {
+    if (formattedDocuments.value && formattedDocuments.value.length > 0) {
+
+        messageRefs.value = formattedDocuments.value.map(() => null);
+    }
+});
+    // onMounted(()=>{
+    //     fetchUsers();
+    // })
+    let observer;
+
+  onMounted(() => {
+    fetchUsers();
+
+    
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const doc = entry.target.__doc;
+          if (doc) markAsSeen(doc);
+        }
+      });
+    });
+
+    
+    watchEffect(() => {
+      if (!formattedDocuments.value || formattedDocuments.value.length === 0) return;
+      if (!messageRefs.value) {
+        messageRefs.value = [];
+      }
+
+      messageRefs.value.forEach((messageEl, index) => {
+        if (messageEl && !messageEl.__doc) {
+          messageEl.__doc = formattedDocuments.value[index];
+          observer.observe(messageEl);
+        }
+      });
+    });
+  });
+
+  onBeforeUnmount(() => {
+    if (observer) observer.disconnect();
+    messageRefs.value = []; 
+  });
+
 </script>
 
 <style scoped>
@@ -176,9 +235,6 @@
         justify-content: center;
         align-items: center;
     }
-    .single{
-        margin:18px 0;
-    }
     .messages{
         max-height: 400px;
         display: flex;
@@ -191,6 +247,16 @@
         border-radius: 10px;
         max-width:60%;
         word-wrap: break-word;
+    }
+    .single .status {
+        font-size: 0.8rem;
+        color: gray;
+        margin-top: 4px;
+        display: block;
+    }
+    .single.outgoing .status {
+        text-align: right;
+        color: blue;
     }
     .incoming{
         background-color: #e0e0e0;
