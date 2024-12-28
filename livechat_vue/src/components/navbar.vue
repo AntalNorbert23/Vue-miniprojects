@@ -10,12 +10,18 @@
 </template>
 
 <script setup>
+    //composables import 
     import useLogout from '@/composables/useLogout';
     import getUser from '@/composables/getUser';
+
+    //router import 
+    import {useRoute, useRouter} from 'vue-router';
+
+    //use composables
     const { logout, error }=useLogout();
     const { user }=getUser();
 
-    import {useRoute, useRouter} from 'vue-router';
+    //use router
     const route=useRoute();
     const router=useRouter();
 

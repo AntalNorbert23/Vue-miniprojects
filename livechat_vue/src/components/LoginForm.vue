@@ -17,29 +17,38 @@
 </template>
 
 <script setup>
-    import { ref,computed } from 'vue';
-    import useLogin from '@/composables/useLogin';
-    import { useLoader } from '@/composables/useLoading';
-    const { isLoading,setLoading } =useLoader();
-
+    //component imports
     import Loader from './Loader.vue';
 
-    const email=ref('');
-    const password=ref('');
-    const emit=defineEmits(['login']);
+    //vue imports
+    import { ref,computed } from 'vue';
 
-    const passVisible=ref(false);
+    //composables imports
+    import useLogin from '@/composables/useLogin';
+    import { useLoader } from '@/composables/useLoading';
 
+    //using composables
+    const { isLoading,setLoading } =useLoader();
     const { error,login }=useLogin();
 
+    //constants
+    const email=ref('');
+    const password=ref('');
+    const passVisible=ref(false);
+
+    //emits
+    const emit=defineEmits(['login']);
+
+
     const passwordInputType=computed(()=>{
-        return passVisible.value ? 'text' : 'password';
+        return passVisible.value ? 'text' : 'password'; //type of text password or text based on passVisible value
     })
 
     const togglePasswordVisibility=()=>{
-        passVisible.value=!passVisible.value
+        passVisible.value=!passVisible.value; //toggle the value of passVisible from true to false and inverse
     }
 
+    //handling submit
     const handleSubmit= async ()=>{
         setLoading(true);
         await login(email.value, password.value);
@@ -48,7 +57,6 @@
             emit('login');
         }
     }
-
 
 </script>
 

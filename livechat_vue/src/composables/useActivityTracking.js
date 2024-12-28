@@ -1,6 +1,7 @@
 //firestore imports
 import { doc, updateDoc } from 'firebase/firestore';
 import { DB } from '@/firebase/config';
+
 //get the current user
 import getUser from './getUser';
 const { user } = getUser();

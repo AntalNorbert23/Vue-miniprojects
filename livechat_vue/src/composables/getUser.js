@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const user =ref(null);
 
+//if the authentication changes change the user
 onAuthStateChanged(AUTH,(authUser)=>{
     if(authUser){
         user.value = authUser;

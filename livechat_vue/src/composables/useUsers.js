@@ -11,6 +11,8 @@ const { user } = getUser();
 import { useLoader } from '@/composables/useLoading';
 const { setLoading } = useLoader();
 
+const currentUser = computed(() => user.value);
+
 export const fetchUsers =  () => {
     if (isLoaded.value && unsubscribe) return { users };
 
@@ -35,6 +37,12 @@ export const filteredUsers=computed(()=>{
     return users.value.filter(otherUser=>otherUser.id !== user.value.uid);
   })
 
+export const filteredUser=computed(()=>{
+  if(!users.value || !user.value) return [];
+  
+  return users.value.filter(otherUser=>otherUser.id == user.value.uid);
+})
+
   export const stopListeningToUsers = () => {
     if (unsubscribe) {
       unsubscribe();
@@ -48,6 +56,8 @@ export const filteredUsers=computed(()=>{
     return {
         users,
         filteredUsers,
-        fetchUsers
+        fetchUsers,
+        filteredUser,
+        currentUser
     };
 };

@@ -16,23 +16,29 @@
 </template>
 
 <script setup>
-    import { useRouter } from 'vue-router';
-    const router = useRouter();
-
-    import getUser from '@/composables/getUser.js';
-    const { user } = getUser();
-    import { fetchUsers, filteredUsers } from '@/composables/useUsers';
+    //component imports
     import Loader from './Loader.vue';
 
+    //router import
+    import { useRouter } from 'vue-router';
+
+    //composable imports
+    import getUser from '@/composables/getUser.js';
+    import { fetchUsers, filteredUsers } from '@/composables/useUsers';
     import { useLoader } from '@/composables/useLoading';
+
+    //use router
+    const router = useRouter();
+
+    //use composables
+    const { user } = getUser();
     const { isLoading } = useLoader();
 
     //fetching users list
     fetchUsers();
     
-
-     // function that handles entering the chat
-     const handleEnterChat = (otherUser) => {
+    // function that handles entering the chat
+    const handleEnterChat = (otherUser) => {
         const chatId = [user.value.uid, otherUser.id].sort().join('_');
         router.push({ name: 'chatroom', params: { chatId }, query:{otherUserId:otherUser.id} });
     };

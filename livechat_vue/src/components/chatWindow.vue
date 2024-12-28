@@ -1,17 +1,11 @@
 <template>
     <div class="chat-window">
-        
-            <div class="user-status">
-                <li v-for="otherUser in filteredUser" :key="otherUser.id" @click="handleEnterChat(otherUser)">
-                    <span v-if="otherUser.online" class="online-indicator"></span>
-                    <span v-else class="offline-indicator"></span>
-                    {{ otherUser.displayName }}
-                </li>
-            </div>
+        <UserStatus/>
        
         <div v-if="isLoading" class="loader-container">
             <Loader />
         </div>
+
         <div v-else-if="documents && documents.length>0"
             class="messages"
             ref="messages"
@@ -22,23 +16,12 @@
                 <span class="message" v-if="!doc.fileURL">{{ doc.message }}</span>
                 <span v-if="doc.uid === currentUser.uid" class="status">{{ doc.status }}</span>
                 <div>
-                    <div v-if="doc.fileURL">
-                        <div v-if="isImage(doc.fileURL)" >
-                            <a :href="doc.fileURL" target="_blank"><img :src="doc.fileURL" :alt="doc.fileName" class="chat-image"/></a>
-                        </div>
-                        <div v-else>
-                            <a :href="doc.fileURL" target="_blank">{{ doc.fileName }}</a>
-                        </div>
-                    </div>
+                    <ImageItem :doc="doc"/>
                 </div>
             </div>
         </div>
-        <div v-else class="no_messages">
-            <p>Type a message and press enter to start a conversation...</p>
-        </div>
-        <div v-if="typingUsers.length>0" class="typing_user">
-            <span v-for="user in typingUsers" key="user.id">{{ user.name }} is typing...</span>
-        </div>
+        <EmptyState v-else/>
+        <TypingIndicator :typingUsers="typingUsers"/>
     </div>
     <div v-if="error">
             {{ error }}
@@ -46,45 +29,43 @@
 </template>
 
 <script setup>
+    //components import
+    import UserStatus from './UserStatus.vue';
     import Loader from '@/components/Loader.vue'
+    import EmptyState from './EmptyState.vue';
+    import TypingIndicator from './TypingIndicator.vue';
+    import ImageItem from './ImageItem.vue';
 
-    import { computed,ref,onUpdated,watchEffect, onMounted,onBeforeUnmount } from 'vue';
+    //vue imports
+    import { computed,ref,watchEffect, onMounted } from 'vue';
 
+    //composables import
     import getCollection from '@/composables/getCollection';
-    import { formatDistanceToNow } from 'date-fns';
-
+    import { useChat } from '@/composables/useChat';
     import { useLoader } from '@/composables/useLoading';
-    const { isLoading } = useLoader();
-
-    import getUser from '@/composables/getUser'
-    const { user } = getUser();
-    import { useRoute } from 'vue-router'
-    const route =useRoute();
-
-    const otherUserId = route.query.otherUserId;
-    const currentUser = computed(() => user.value);
     import { useUsers } from '@/composables/useUsers';
-    import { DB } from '@/firebase/config';
-    import { updateDoc,doc } from 'firebase/firestore';
+    import getUser from '@/composables/getUser'
+    import { useScroll } from '@/composables/useScroll';
+    import { useObserver } from '@/composables/useObserver';
 
-    const {users,fetchUsers}=useUsers();
-
-   
-    const filteredUser=computed(()=>{
-        if(!users.value || !user.value) return [];
-        
-        return users.value.filter(otherUser=>otherUser.id == otherUserId);
-    })
-
+    //props
     const props=defineProps({
         chatId:String
     });
 
+    //destructuring composables
+    const { user } = getUser();
+    const { isLoading } = useLoader();
     const { documents, error,typingUsers }=getCollection(`chat_${props.chatId}`);
-
-    const messages=ref(null);
+    const { formattedDocuments,markAsSeen,messageClass } =useChat(documents,user,props);
+    const {fetchUsers}=useUsers();
+    const messages = ref(null);
+   
+    //constants
+    const currentUser = computed(() => user.value);
     const messageRefs = ref([]); 
 
+    //watcheffect
     watchEffect(() => {
         if (documents.value) {
             isLoading.value = false; // Stop loader
@@ -92,143 +73,19 @@
             isLoading.value = true; // Show loader
         }
     });
-    
 
-    onUpdated(()=>{
-        if(messages.value){
-            messages.value.scrollTop=messages.value.scrollHeight;
-        }
-       
-    })
-
-    const formattedDocuments=computed(()=>{
-        if (documents.value) {
-            return documents.value.map(doc=>{
-                let time= formatDistanceToNow(doc.createdAt.toDate())
-                
-                return { ...doc, createdAt:time }
-            })
-        }
-    })
-
-    const markAsSeen = async (messageDoc) => {
-        if (messageDoc.status !== 'seen' && messageDoc.uid !== user.value.uid) {
-            const messageRef = doc(DB, `chat_${props.chatId}/${messageDoc.id}`);
-
-            try {
-                await updateDoc(messageRef, { status: 'seen' });
-            } catch (error) {
-                console.error('Failed to mark message as seen:', error);
-            }
-        }
-    };
-
-    const messageClass=(message)=>{
-        if(!user.value) return 
-        return message.uid === user.value.uid ? 'outgoing' : 'incoming';
-    }
-
-    const isImage = (url) => {
-        const decodedUrl = decodeURIComponent(url);
-
-        return /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(decodedUrl.split('?')[0]);
-    };
-
-    watchEffect(() => {
-    if (formattedDocuments.value && formattedDocuments.value.length > 0) {
-
-        messageRefs.value = formattedDocuments.value.map(() => null);
-    }
-});
-    // onMounted(()=>{
-    //     fetchUsers();
-    // })
-    let observer;
-
-  onMounted(() => {
-    fetchUsers();
-
-    
-    observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const doc = entry.target.__doc;
-          if (doc) markAsSeen(doc);
-        }
-      });
+    onMounted(() => {
+        fetchUsers();
+        useScroll(messages,formattedDocuments);
+        useObserver(messageRefs,formattedDocuments,markAsSeen);
     });
-
-    
-    watchEffect(() => {
-      if (!formattedDocuments.value || formattedDocuments.value.length === 0) return;
-      if (!messageRefs.value) {
-        messageRefs.value = [];
-      }
-
-      messageRefs.value.forEach((messageEl, index) => {
-        if (messageEl && !messageEl.__doc) {
-          messageEl.__doc = formattedDocuments.value[index];
-          observer.observe(messageEl);
-        }
-      });
-    });
-  });
-
-  onBeforeUnmount(() => {
-    if (observer) observer.disconnect();
-    messageRefs.value = []; 
-  });
 
 </script>
 
 <style scoped>
-    .user-status {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        height: 10px;
-        background-color: #f4f4f9;
-        position: relative;
-        top:-30px;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
-    .online-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #00cc66; 
-        display: inline-block;
-        margin-right: 8px;
-    }
-    li{
-        display: inline;
-    }
-    .offline-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #cc0000; 
-        display: inline-block;
-        margin-right: 8px;
-    }
     .chat-window{
         background-color: #fafafa;
         padding:30px 20px;
-    }
-    .no_messages{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .typing_user{
-        padding:20px;
-    }
-    .typing_user span{
-        color:rgb(9, 23, 223);
-        box-shadow:0 4px 6px rgb(178, 182, 231);
-        border-radius: 5px;
-        padding:5px;
     }
     .loader-container{
         display:flex;
@@ -285,10 +142,5 @@
         font-weight:bold;
         margin-right:6px;
         padding-left:3px;
-    }
-    .chat-image {
-        width:300px;
-        height: 50%;
-        border-radius: 8px;
     }
 </style>

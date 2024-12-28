@@ -11,13 +11,19 @@
 </template>
 
 <script setup>
+    //vue imports
     import { ref } from 'vue';
+
+    //composable imports
     import useSignup from '@/composables/useSignup';
 
+    //use composables
     const { error, signUp }=useSignup();
 
+    //emits
     const emit=defineEmits(['signup']);
-      
+    
+    //constants
     const displayName=ref('');
     const email=ref('');
     const password=ref('');
@@ -28,6 +34,5 @@
             emit('signup');
         }
     }
-
-
+    
 </script>

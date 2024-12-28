@@ -32,20 +32,23 @@
 
 
 <script setup>
+    //vue imports
     import { ref,onMounted,onBeforeUnmount} from 'vue';
-    import 'https://cdn.skypack.dev/emoji-picker-element';
-
-    import {timestamp} from '@/firebase/config'
     
-    import getUser from '@/composables/getUser'
-    const { user }=getUser();
-
-    import useNotification from '@/composables/useNotification';
-    const { addNotification }=useNotification();
-
-    import { storage } from '@/firebase/config';
+    //firebase imports
+    import {timestamp, storage} from '@/firebase/config';
     import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+    //emoji picker
+    import 'https://cdn.skypack.dev/emoji-picker-element';
+
+    //composable imports
+    import getUser from '@/composables/getUser';
+    import useNotification from '@/composables/useNotification';
+    import { useChat } from '@/composables/useChat';
+    import useCollection from'@/composables/useCollection'
+
+    //props
     const props =defineProps({
         chatId:{
             type:String,
@@ -53,30 +56,46 @@
         }
     })
 
-    import useCollection from'@/composables/useCollection'
-    const { addDocToCollection, error,setTypingStatus }=useCollection(`chat_${props.chatId}`);
+    //composable usage
+    const { user }=getUser();
+    const { addNotification }=useNotification();
+    const { addDocToCollection, error }=useCollection(`chat_${props.chatId}`);
+    
+    
 
+    //constants
     const message=ref('');
-    const showEmojiPicker=ref(false);
+    const fileName = ref('');
+    const file = ref(null);
     const placeholderText = ref('Type a message and hit enter to send...');
     const isPlaceholderRed = ref(false);
     const fileInput = ref(null);
-    const fileName = ref('');
-    const file = ref(null);
-
-
+    
+    const {
+        handleTyping,
+        toggleEmojiPicker,
+        showEmojiPicker,
+        handleEmojiClick,
+        handleFileChange,
+        handleClickOutside} = useChat(document,user,props,message,file,fileName);
+    
+    //handle submit of message
     const handleSubmit=async ()=>{
+
         if(message.value !==''){
+
             const participants=props.chatId ? props.chatId.split('_') : [];
+
             let chat={
                 message:message.value,
                 name:user.value.displayName,
                 createdAt:timestamp(),
                 uid:user.value.uid,
-                participants:participants,
+                participants,
                 status:'sent'
             }
 
+            //if there is a file then upload file to storage 
             if (file.value) {
                 const fileRef = storageRef(storage, `chat_files/${Date.now()}_${file.value.name}`);
                 const uploadResult = await uploadBytes(fileRef, file.value);
@@ -89,6 +108,7 @@
 
             const otherUser=participants.find(id =>id !== user.value.uid);
           
+            //for the other user display the notification of new message
             if (otherUser){
                 const notification = {
                     recipientId: otherUser,
@@ -111,30 +131,10 @@
             }, 3000);
         }
         
-
         if(!error.value){
             message.value='';
         }  
     }
-
-    const handleTyping=()=>{
-        setTypingStatus(user.value);
-    }
-
-    const toggleEmojiPicker = () => {
-        showEmojiPicker.value = !showEmojiPicker.value;
-    };
-    const handleEmojiClick = (event) => {
-        const emoji=event.detail.unicode;
-        message.value+=emoji;
-        showEmojiPicker.value = false;
-    };
-
-    const handleFileChange = (event) => {
-        file.value = event.target.files[0];
-        fileName.value = file.value ? file.value.name : '';
-        message.value = `Selected file: ${fileName.value}`; 
-    };
 
     const triggerFileInput = () => {
         fileInput.value.click();
@@ -147,14 +147,6 @@
     onBeforeUnmount(()=>{
         document.removeEventListener('click',handleClickOutside);
     })
-
-    const handleClickOutside=(event)=>{
-        const picker=document.querySelector('.emoji-picker');
-        const button=document.querySelector('.emoji-button');
-        if(picker && !picker.contains(event.target) &&!button.contains(event.target)){
-            showEmojiPicker.value=false;
-        }
-    };
        
 </script>
 

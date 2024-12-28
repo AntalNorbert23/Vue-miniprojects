@@ -3,12 +3,12 @@
       :class="loaderClasses"
       :style="loaderStyles"
     ></div>
-  </template>
+</template>
   
-  <script setup>
-      import { computed } from 'vue';
+<script setup>
+    import { computed } from 'vue';
   
-      const { size, fullPage, color, speed } = defineProps({
+    const { size, fullPage, color, speed } = defineProps({
       size: {
           type: String,
           default: 'medium',
@@ -26,24 +26,24 @@
           type: [Number, String],
           default: 2
       }
-      });
+    });
   
-     const loaderClasses = computed (()=>({
-          loader: true,
-          'loader--small': size === 'small',
-          'loader--medium': size === 'medium',
-          'loader--large': size === 'large',
-          'loader--full-page': fullPage,
-     }));
+    const loaderClasses = computed (()=>({
+        loader: true,
+        'loader--small': size === 'small',
+        'loader--medium': size === 'medium',
+        'loader--large': size === 'large',
+        'loader--full-page': fullPage,
+    }));
   
      const loaderStyles = computed(()=>({
-          borderTopColor: color,
-          animationDuration: `${speed}`
+        borderTopColor: color,
+        animationDuration: `${speed}`
      }))
   
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
       .loader {
           border: 8px solid #f3f3f3;
           border-radius: 50%;
@@ -74,4 +74,4 @@
           0% { transform: rotate(0deg) }
           100% { transform: rotate(360deg) }
       }
-  </style>
+</style>
