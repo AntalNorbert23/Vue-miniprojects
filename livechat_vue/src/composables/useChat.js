@@ -35,14 +35,14 @@ export function useChat(documents, user,props,message,file,fileName) {
   };
 
   //add the class of the message based on user
-  const messageClass = (message) => (message.uid === user.value.uid ? 'outgoing' : 'incoming');
+  const messageClass = (message) => (message.uid === user.value?.uid ? 'outgoing' : 'incoming');
 
   //function to check if the file is an image
   const isImage = (url) => /\.(jpeg|jpg|gif|png|bmp|webp)$/i.test(decodeURIComponent(url).split('?')[0]);
 
   //set the typing status
   const handleTyping=()=>{
-    setTypingStatus(user.value);
+    setTypingStatus(user.value,`chat_${props.chatId}`);
   }
 
   //toggle the visibility of emojiPicker

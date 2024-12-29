@@ -1,12 +1,15 @@
+//vue imports
 import { ref,watchEffect } from "vue";
+
+//firebase imports
 import { DB } from "@/firebase/config";
 import { collection, query,orderBy,onSnapshot, where } from "firebase/firestore";
 
-
+//composable import and usage
 import getUser from "./getUser";
 const { user }=getUser();
 
-
+//get collection of documents 
 const getCollection=(collectionName)=>{
     const documents=ref(null);
     const error=ref(null);
@@ -32,8 +35,10 @@ const getCollection=(collectionName)=>{
         error.value='Could not fetch data';
     })
 
-    const typingQuery=query(collection(DB,'typingStatuses'),where('isTyping','==',true))
+    //get  typingquery
+    const typingQuery=query(collection(DB,'typingStatuses'),where('isTyping','==',true),where('chatId', '==', collectionName))
     const unsubTyping=onSnapshot(typingQuery,(snapshot)=>{
+        //filter users that is typing
         typingUsers.value=snapshot.docs.map(doc=>doc.data())
                                         .filter(typingUser => typingUser.uid !== user.value.uid)
     })

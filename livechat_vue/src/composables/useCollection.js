@@ -1,4 +1,7 @@
+//vue imports
 import { ref } from "vue";
+
+//firebase imports
 import { DB } from "@/firebase/config";
 import { collection, addDoc,setDoc,doc, deleteDoc } from "firebase/firestore";
 
@@ -6,6 +9,7 @@ import { collection, addDoc,setDoc,doc, deleteDoc } from "firebase/firestore";
 const useCollection=(collectionName)=>{
     const error=ref(null);
     let typingTimeout = null;
+    //add doc to collection
     const addDocToCollection=async(doc)=>{
         error.value=null;
 
@@ -18,9 +22,10 @@ const useCollection=(collectionName)=>{
         }
     }
 
-    const setTypingStatus=async(user)=>{
+    //set typingstatus to true
+    const setTypingStatus=async(user,chatId)=>{
         const typingDocRef=doc(collection(DB,'typingStatuses'),user.uid);
-        await setDoc(typingDocRef,{name: user.displayName, uid:user.uid, isTyping:true})
+        await setDoc(typingDocRef,{name: user.displayName, uid:user.uid, isTyping:true,chatId})
     
         if (typingTimeout) clearTimeout(typingTimeout);
 
