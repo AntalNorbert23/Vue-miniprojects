@@ -14,7 +14,7 @@
                 <span class="created-at">{{ doc.createdAt }}</span>
                 <span class="name">{{ doc.name }}</span>
                 <span class="message" v-if="!doc.fileURL">{{ doc.message }}</span>
-                <span v-if="doc.uid === currentUser.uid" class="status">{{ doc.status }}</span>
+                <span v-if="doc.uid === currentUser?.uid" class="status">{{ doc.status }}</span>
                 <div>
                     <ImageItem :doc="doc"/>
                 </div>
@@ -76,7 +76,7 @@
 
     onMounted(() => {
         fetchUsers();
-        useScroll(messages,formattedDocuments);
+        useScroll(messages,formattedDocuments,currentUser);
         useObserver(messageRefs,formattedDocuments,markAsSeen);
     });
 
