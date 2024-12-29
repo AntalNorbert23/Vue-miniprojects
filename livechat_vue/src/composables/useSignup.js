@@ -12,6 +12,7 @@ const signUp=async (email, password, displayName)=>{
     error.value=null;
 
     try{
+      //create user with email and password
       const response=  await createUserWithEmailAndPassword(AUTH,email, password);
       if(!response){
         throw new Error('Could not complete the signup');
@@ -20,6 +21,8 @@ const signUp=async (email, password, displayName)=>{
       error.value=null;
 
       const userDoc=doc(DB,'users',response.user.uid);
+      
+      //set user
       await setDoc(userDoc,{
         uid:response.user.uid,
         email:response.user.email,
